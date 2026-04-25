@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "noshow_iq"
+version = "0.1.0"
+description = "NoShowIQ: predict medical appointment no-shows (MLOps midterm)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "SAP 23769" }]
+dependencies = [
+  "pandas>=2.1",
+  "numpy>=1.26",
+  "scikit-learn>=1.4",
+  "joblib>=1.3",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pymongo>=4.6",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "httpx>=0.27",
+  "flake8>=7.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["noshow_iq*"]
+
