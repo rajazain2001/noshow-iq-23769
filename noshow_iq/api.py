@@ -19,7 +19,7 @@ from noshow_iq.preprocess import preprocess_record
 class AppSettings:
     mongo_uri: str | None
     db_name: str = "noshow_iq"
-    model_path: str = "model.pkl"
+    model_path: str = "artifacts/model.pkl"
 
 
 def _utc_now_iso() -> str:
