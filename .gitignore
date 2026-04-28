@@ -12,6 +12,7 @@ build/
 *.egg-info/
 .env
 .env.*
+!.env.example
 data/raw/
 /model.pkl
 !/artifacts/model.pkl
