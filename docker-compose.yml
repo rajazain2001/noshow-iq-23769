@@ -4,8 +4,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Local compose Mongo (no auth). For Atlas/HF, override with a secret.
-      - MONGO_URI=mongodb://mongodb:27017
+      # Default to local compose Mongo. Override by setting MONGO_URI in `.env` (gitignored)
+      # or via deployment secrets (GitHub Actions / Hugging Face Spaces).
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017}
     depends_on:
       - mongodb
 
