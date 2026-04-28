@@ -7,6 +7,7 @@ from typing import Any, Optional
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 
@@ -59,6 +60,10 @@ def create_app(
             client = get_client(s.mongo_uri)
 
     db = get_db(client, s.db_name) if client is not None else None
+
+    @app.get("/")
+    def root() -> RedirectResponse:
+        return RedirectResponse(url="/docs")
 
     @app.get("/health")
     def health() -> dict[str, Any]:
