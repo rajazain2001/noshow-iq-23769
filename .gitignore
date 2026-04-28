@@ -13,5 +13,6 @@ build/
 .env
 .env.*
 data/raw/
-model.pkl
+/model.pkl
+!/artifacts/model.pkl
 
