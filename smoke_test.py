@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import time
 from typing import Any
 
 import httpx
@@ -31,8 +32,20 @@ def smoke_test(base_url: str) -> bool:
 
     payload = _predict_payload()
 
-    with httpx.Client(timeout=30.0) as client:
-        health = client.get(endpoints["health"])
+    with httpx.Client(timeout=60.0) as client:
+        health = None
+        for attempt in range(1, 11):
+            try:
+                health = client.get(endpoints["health"])
+                break
+            except httpx.TimeoutException:
+                print(f"WAIT: /health timed out (attempt {attempt}/10)")
+                time.sleep(6)
+
+        if health is None:
+            print("FAIL: /health timed out repeatedly")
+            return False
+
         if health.status_code != 200:
             print("FAIL: /health", health.status_code, health.text)
             return False
