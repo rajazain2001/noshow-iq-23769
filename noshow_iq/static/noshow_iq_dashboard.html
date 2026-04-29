@@ -59,13 +59,6 @@
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); flex-shrink: 0; transition: background 0.3s; }
   .dot.ok { background: #63c97a; }
 
-  /* URL BAR */
-  .url-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
-  .url-input { flex: 1; font-family: var(--mono); font-size: 12px; padding: 9px 12px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--surface); color: var(--text); outline: none; }
-  .url-input:focus { border-color: var(--brand); }
-  .connect-btn { padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: var(--display); background: var(--brand); color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
-  .connect-btn:hover { opacity: 0.86; }
-
   /* TABS */
   .tabs { display: flex; gap: 0; border: 0.5px solid var(--border2); border-radius: var(--radius); overflow: hidden; margin-bottom: 1.5rem; width: fit-content; }
   .tab { padding: 7px 20px; font-size: 13px; font-family: var(--display); font-weight: 500; color: var(--text2); cursor: pointer; border: none; background: transparent; transition: background 0.12s, color 0.12s; }
@@ -172,12 +165,6 @@
     </div>
   </div>
 
-  <!-- URL BAR -->
-  <div class="url-row">
-    <input class="url-input" id="base-url" type="text" placeholder="https://your-app.hf.space  or  http://localhost:8000" />
-    <button class="connect-btn" onclick="checkHealth()">connect</button>
-  </div>
-
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('predict', this)">predict</button>
@@ -190,13 +177,9 @@
   <div class="section active" id="tab-predict">
     <p class="section-label">appointment record</p>
     <div class="predict-grid">
-      <div class="field"><label>Patient ID</label><input id="p-id" type="text" placeholder="e.g. 29872499" /></div>
       <div class="field"><label>Age</label><input id="p-age" type="number" placeholder="34" min="0" max="115" /></div>
       <div class="field"><label>Booking date</label><input id="p-scheduled" type="date" /></div>
       <div class="field"><label>Appointment date</label><input id="p-appointment" type="date" /></div>
-      <div class="field"><label>Gender</label>
-        <select id="p-gender"><option value="F">Female</option><option value="M">Male</option></select></div>
-      <div class="field"><label>Neighbourhood</label><input id="p-neighbourhood" type="text" placeholder="JARDIM DA PENHA" /></div>
       <div class="field"><label>Scholarship (Bolsa Família)</label>
         <select id="p-scholarship"><option value="0">No</option><option value="1">Yes</option></select></div>
       <div class="field"><label>Hypertension</label>
@@ -254,7 +237,6 @@
   <div class="section" id="tab-health">
     <p class="section-label">system health — GET /health</p>
     <div class="health-card">
-      <div class="health-row"><span class="health-key">API endpoint</span><span class="health-val" id="h-url">—</span></div>
       <div class="health-row"><span class="health-key">GET /health status</span><span class="health-val" id="h-status">—</span></div>
       <div class="health-row"><span class="health-key">response time</span><span class="health-val" id="h-latency">—</span></div>
       <div class="health-row"><span class="health-key">MongoDB</span><span class="health-val" id="h-db">—</span></div>
@@ -268,7 +250,7 @@
 
 <script>
   const $ = id => document.getElementById(id);
-  const getBase = () => ($('base-url').value || '').replace(/\/$/, '');
+  const BASE_URL = window.location.origin.replace(/\/$/, '');
 
   function setStatus(ok, text) {
     $('status-dot').className = 'dot' + (ok ? ' ok' : '');
@@ -308,23 +290,22 @@
   }
 
   async function checkHealth() {
-    const base = getBase();
-    $('h-url').textContent = base || '(none)';
     $('h-status').textContent = 'checking…';
     $('h-status').className = 'health-val';
     const t0 = Date.now();
     try {
-      const r = await fetch(base + '/health');
+      const r = await fetch(BASE_URL + '/health');
       const ms = Date.now() - t0;
       $('h-latency').textContent = ms + ' ms';
       const d = await r.json().catch(() => ({}));
       if (r.ok) {
         $('h-status').textContent = '200 OK';
         $('h-status').className = 'health-val ok';
-        $('h-db').textContent = String(d.mongo);
+        const mongoOk = d.mongo === true;
+        $('h-db').textContent = mongoOk ? 'connected' : 'not connected';
         $('h-model').textContent = 'artifacts/model.pkl';
         $('h-ver').textContent = 'v0.1.0';
-        setStatus(true, 'connected');
+        setStatus(mongoOk, mongoOk ? 'connected' : 'api ok (mongo off)');
       } else {
         $('h-status').textContent = r.status + ' ' + r.statusText;
         $('h-status').className = 'health-val err';
@@ -346,12 +327,9 @@
     btn.innerHTML = '<div class="spinner"></div>predicting…';
 
     const payload = {
-      PatientId: $('p-id').value || '0',
       Age: parseInt($('p-age').value) || 30,
       ScheduledDay: $('p-scheduled').value || new Date().toISOString().slice(0, 10),
       AppointmentDay: $('p-appointment').value || new Date().toISOString().slice(0, 10),
-      Gender: $('p-gender').value,
-      Neighbourhood: $('p-neighbourhood').value || 'CENTRO',
       Scholarship: parseInt($('p-scholarship').value),
       Hipertension: parseInt($('p-hypertension').value),
       Diabetes: parseInt($('p-diabetes').value),
@@ -361,7 +339,7 @@
     };
 
     try {
-      const r = await fetch(getBase() + '/predict', {
+      const r = await fetch(BASE_URL + '/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -395,7 +373,7 @@
     const list = $('history-list');
     list.innerHTML = '<div class="empty-state">loading…</div>';
     try {
-      const r = await fetch(getBase() + '/history');
+      const r = await fetch(BASE_URL + '/history');
       if (!r.ok) throw new Error(r.statusText);
       const items = await r.json();
       if (!items.length) {
@@ -409,7 +387,7 @@
         const ts = item.timestamp
           ? new Date(item.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
           : '—';
-        const pid = item.raw_input?.PatientId || '—';
+        const pid = item.raw_input?.PatientId || item.raw_input?.patient_id || '—';
         const div = document.createElement('div');
         div.className = 'hist-row';
         div.innerHTML = `
@@ -426,7 +404,7 @@
 
   async function loadStats() {
     try {
-      const r = await fetch(getBase() + '/stats');
+      const r = await fetch(BASE_URL + '/stats');
       if (!r.ok) throw new Error(r.statusText);
       const d = await r.json();
       $('s-total').textContent = d.total_predictions ?? '—';
@@ -440,14 +418,10 @@
     }
   }
 
-  // Init defaults: use current origin so it works on Hugging Face automatically.
-  $('base-url').value = window.location.origin;
-
   const today = new Date().toISOString().slice(0, 10);
   const future = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   $('p-scheduled').value = today;
   $('p-appointment').value = future;
-  $('p-id').value = Math.floor(Math.random() * 9e8 + 1e8);
   $('p-age').value = Math.floor(Math.random() * 50 + 18);
 
   // Auto-connect on load so the UI is interactive immediately.
