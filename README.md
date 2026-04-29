@@ -3,6 +3,7 @@
 Predicts the risk of a patient not showing up for a medical appointment.
 
 ### Status
+- CI badge: [![ci-cd](https://github.com/rajazain2001/noshow-iq-23769/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/rajazain2001/noshow-iq-23769/actions/workflows/ci-cd.yml)
 - **Live URL**: _TBD (Hugging Face Spaces)_
 
 ### Local development (day 1)
@@ -13,4 +14,10 @@ pip install -r requirements.txt
 ```
 
 Dataset expected at `data/raw/KaggleV2-May-2016.csv`.
+
+### Smoke test (after deployment)
+Run:
+```bash
+python smoke_test.py https://<your-space>.hf.space
+```
 
