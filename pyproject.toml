@@ -3,8 +3,8 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "noshow_iq"
-version = "0.1.0"
+name = "noshowiq-23769"
+version = "0.1.2"
 description = "NoShowIQ: predict medical appointment no-shows (MLOps midterm)."
 readme = "README.md"
 requires-python = ">=3.11"

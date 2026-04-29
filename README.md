@@ -41,3 +41,6 @@ Open:
 python smoke_test.py https://<your-space>.hf.space
 ```
 
+### TestPyPI (required by exam)
+- Project URL: https://test.pypi.org/project/noshowiq-23769/0.1.2/
+
