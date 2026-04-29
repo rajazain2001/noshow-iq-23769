@@ -60,7 +60,8 @@ jobs:
 
           # HF space to restart (Docker runtime)
           repo_id = "raja2001/noshow-iq-23769"
-          api = HfApi(token=os.environ["HF_TOKEN"])
+          token = os.environ["HF_TOKEN"].strip()
+          api = HfApi(token=token)
           api.restart_space(repo_id=repo_id)
           print("Restart requested for", repo_id)
           PY
