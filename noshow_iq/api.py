@@ -3,15 +3,20 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any
 
-import numpy as np
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pymongo import MongoClient
 
-from noshow_iq.db import aggregate_stats, fetch_prediction_history, get_client, get_db, insert_prediction
+from noshow_iq.db import (
+    aggregate_stats,
+    fetch_prediction_history,
+    get_client,
+    get_db,
+    insert_prediction,
+)
 from noshow_iq.model import load_model
 from noshow_iq.preprocess import preprocess_record
 
@@ -62,8 +67,9 @@ def create_app(
     db = get_db(client, s.db_name) if client is not None else None
 
     @app.get("/")
-    def root() -> RedirectResponse:
-        return RedirectResponse(url="/docs")
+    def root() -> HTMLResponse:
+        html_path = Path(__file__).parent / "static" / "dashboard.html"
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
     @app.get("/health")
     def health() -> dict[str, Any]:
@@ -81,7 +87,10 @@ def create_app(
         try:
             artifact = load_model(s.model_path)
         except Exception:
-            raise HTTPException(status_code=503, detail="Model not available. Train and save model.pkl first.")
+            raise HTTPException(
+                status_code=503,
+                detail="Model not available. Train and save model.pkl first.",
+            )
 
         X = preprocess_record(payload)
         X = X.reindex(columns=artifact.feature_columns, fill_value=0)
@@ -107,7 +116,10 @@ def create_app(
         }
 
         if db is None:
-            raise HTTPException(status_code=500, detail="MongoDB not configured. Set MONGO_URI.")
+            raise HTTPException(
+                status_code=500,
+                detail="MongoDB not configured. Set MONGO_URI.",
+            )
 
         insert_prediction(db, doc)
 
@@ -122,13 +134,19 @@ def create_app(
     @app.get("/history")
     def history() -> list[dict[str, Any]]:
         if db is None:
-            raise HTTPException(status_code=500, detail="MongoDB not configured. Set MONGO_URI.")
+            raise HTTPException(
+                status_code=500,
+                detail="MongoDB not configured. Set MONGO_URI.",
+            )
         return fetch_prediction_history(db, limit=20)
 
     @app.get("/stats")
     def stats() -> dict[str, Any]:
         if db is None:
-            raise HTTPException(status_code=500, detail="MongoDB not configured. Set MONGO_URI.")
+            raise HTTPException(
+                status_code=500,
+                detail="MongoDB not configured. Set MONGO_URI.",
+            )
         out = aggregate_stats(db)
         return out
 
