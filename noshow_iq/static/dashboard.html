@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoShowIQ</title>
+    <style>
+      :root {
+        --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --color-text-primary: #1a1a18;
+        --color-text-secondary: #6b6b67;
+        --color-background-primary: #ffffff;
+        --color-background-secondary: #f2f2ef;
+        --color-border-secondary: rgba(0, 0, 0, 0.18);
+        --color-border-tertiary: rgba(0, 0, 0, 0.1);
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+      }
+
+      body {
+        background: #f8f8f6;
+        color: var(--color-text-primary);
+        font-family: var(--font-sans);
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 20px 14px 48px;
+      }
+    </style>
+
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: var(--font-sans); }
+      .app { padding: 1.5rem 0; }
+      .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+      .logo { width: 40px; height: 40px; border-radius: 10px; background: #1D9E75; display: flex; align-items: center; justify-content: center; }
+      .logo svg { width: 22px; height: 22px; fill: white; }
+      .brand h1 { font-size: 20px; font-weight: 600; color: var(--color-text-primary); }
+      .brand p { font-size: 12px; color: var(--color-text-secondary); }
+      .badge-live { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; background: #EAF3DE; color: #3B6D11; padding: 3px 9px; border-radius: 20px; margin-left: auto; }
+      .dot { width: 6px; height: 6px; border-radius: 50%; background: #639922; animation: pulse 1.5s infinite; }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+      .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+      .stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+      .stat-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+      .stat-value { font-size: 22px; font-weight: 700; color: var(--color-text-primary); font-family: var(--font-mono); }
+      .stat-value.danger { color: #A32D2D; }
+      .stat-value.success { color: #0F6E56; }
+      .stat-value.warning { color: #854F0B; }
+      .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+      .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+      .card-title { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+      .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+      .form-row label { font-size: 12px; color: var(--color-text-secondary); }
+      .form-row input, .form-row select { font-size: 13px; padding: 7px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-primary); width: 100%; }
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .predict-btn { width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: var(--border-radius-md); border: none; background: #1D9E75; color: white; cursor: pointer; margin-top: 4px; transition: background 0.15s; }
+      .predict-btn:hover { background: #0F6E56; }
+      .predict-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+      .result-box { margin-top: 14px; border-radius: var(--border-radius-md); padding: 14px; display: none; }
+      .result-box.high { background: #FCEBEB; border: 0.5px solid #F09595; }
+      .result-box.low { background: #E1F5EE; border: 0.5px solid #5DCAA5; }
+      .result-box.medium { background: #FAEEDA; border: 0.5px solid #FAC775; }
+      .result-risk { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+      .result-risk.high { color: #A32D2D; }
+      .result-risk.low { color: #0F6E56; }
+      .result-risk.medium { color: #854F0B; }
+      .result-prob { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+      .result-rec { font-size: 12px; color: var(--color-text-primary); border-top: 0.5px solid rgba(0,0,0,0.08); padding-top: 8px; margin-top: 4px; }
+      .history-list { display: flex; flex-direction: column; gap: 8px; }
+      .history-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+      .history-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; font-family: var(--font-mono); }
+      .history-avatar.high { background: #F7C1C1; color: #791F1F; }
+      .history-avatar.low { background: #9FE1CB; color: #085041; }
+      .history-avatar.medium { background: #FAC775; color: #633806; }
+      .history-info { flex: 1; }
+      .history-name { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+      .history-time { font-size: 11px; color: var(--color-text-secondary); }
+      .history-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+      .history-badge.high { background: #F7C1C1; color: #791F1F; }
+      .history-badge.low { background: #9FE1CB; color: #085041; }
+      .history-badge.medium { background: #FAC775; color: #633806; }
+      .endpoints-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+      .endpoint-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+      .endpoint-row:last-child { border-bottom: none; }
+      .method { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; min-width: 42px; text-align: center; }
+      .method.get { background: #E6F1FB; color: #185FA5; }
+      .method.post { background: #EAF3DE; color: #3B6D11; }
+      .endpoint-path { font-size: 13px; font-family: var(--font-mono); color: var(--color-text-primary); }
+      .endpoint-desc { font-size: 11px; color: var(--color-text-secondary); margin-left: auto; }
+      .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+      .bar-row { display: flex; align-items: center; gap: 10px; }
+      .bar-label { font-size: 12px; color: var(--color-text-secondary); width: 90px; text-align: right; flex-shrink: 0; }
+      .bar-track { flex: 1; height: 10px; background: var(--color-background-secondary); border-radius: 5px; overflow: hidden; }
+      .bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+      .bar-fill.high { background: #E24B4A; }
+      .bar-fill.low { background: #1D9E75; }
+      .bar-count { font-size: 12px; color: var(--color-text-secondary); width: 60px; font-family: var(--font-mono); }
+      .error { margin-top: 10px; font-size: 12px; color: #A32D2D; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="app">
+        <div class="header">
+          <div class="logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+          </div>
+          <div class="brand">
+            <h1>NoShowIQ</h1>
+            <p>Appointment no-show prediction API</p>
+          </div>
+          <span class="badge-live"><span class="dot"></span> Connected</span>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Total predictions</div>
+            <div class="stat-value" id="s-total">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">High risk</div>
+            <div class="stat-value danger" id="s-high">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Low risk</div>
+            <div class="stat-value success" id="s-low">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Avg probability</div>
+            <div class="stat-value warning" id="s-avg">—</div>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <div class="card-title">POST /predict — try it</div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Patient age</label>
+                <input type="number" id="age" value="34" min="0" max="115" />
+              </div>
+              <div class="form-row">
+                <label>Gender</label>
+                <select id="gender"><option>Female</option><option>Male</option></select>
+              </div>
+              <div class="form-row">
+                <label>Scheduled date</label>
+                <input type="date" id="sched" />
+              </div>
+              <div class="form-row">
+                <label>Appointment date</label>
+                <input type="date" id="appt" />
+              </div>
+              <div class="form-row">
+                <label>Neighbourhood</label>
+                <select id="neigh">
+                  <option>JARDIM CAMBURI</option>
+                  <option>MARIA ORTIZ</option>
+                  <option>RESISTÊNCIA</option>
+                  <option>JESUS DE NAZARETH</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>SMS received</label>
+                <select id="sms"><option>Yes</option><option>No</option></select>
+              </div>
+              <div class="form-row">
+                <label>Scholarship</label>
+                <select id="scholar"><option>No</option><option>Yes</option></select>
+              </div>
+              <div class="form-row">
+                <label>Hypertension</label>
+                <select id="hyper"><option>No</option><option>Yes</option></select>
+              </div>
+            </div>
+            <button class="predict-btn" id="predict-btn" onclick="runPredict()">Run prediction ↗</button>
+            <div class="error" id="predict-error"></div>
+            <div class="result-box" id="result-box">
+              <div class="result-risk" id="result-risk"></div>
+              <div class="result-prob" id="result-prob"></div>
+              <div class="result-rec" id="result-rec"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="card">
+              <div class="card-title">GET /history — last predictions</div>
+              <div class="history-list" id="history-list"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Risk distribution (from /stats)</div>
+              <div class="bar-chart">
+                <div class="bar-row">
+                  <div class="bar-label">Low risk</div>
+                  <div class="bar-track"><div class="bar-fill low" id="bar-low" style="width:0%"></div></div>
+                  <div class="bar-count" id="bar-low-n">—</div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-label">High risk</div>
+                  <div class="bar-track"><div class="bar-fill high" id="bar-high" style="width:0%"></div></div>
+                  <div class="bar-count" id="bar-high-n">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="endpoints-card">
+          <div class="card-title" style="margin-bottom:0.75rem;">API endpoints</div>
+          <div class="endpoint-row">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/health</span>
+            <span class="endpoint-desc">Service health check</span>
+          </div>
+          <div class="endpoint-row">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/predict</span>
+            <span class="endpoint-desc">Single appointment risk score</span>
+          </div>
+          <div class="endpoint-row">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/history</span>
+            <span class="endpoint-desc">Last 20 predictions from MongoDB</span>
+          </div>
+          <div class="endpoint-row">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/stats</span>
+            <span class="endpoint-desc">Aggregated MongoDB pipeline stats</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function $(id) { return document.getElementById(id); }
+
+      function riskLabel(risk) {
+        if (!risk) return "unknown";
+        const r = String(risk).toLowerCase();
+        if (r.includes("high")) return "high";
+        if (r.includes("med")) return "medium";
+        return "low";
+      }
+
+      function fmtPct(p) {
+        if (p == null || Number.isNaN(p)) return "—";
+        return (p * 100).toFixed(1) + "%";
+      }
+
+      async function loadStats() {
+        const r = await fetch("/stats");
+        const d = await r.json();
+        $("s-total").textContent = d.total_predictions ?? "—";
+        $("s-high").textContent = d.high_risk_count ?? "—";
+        $("s-low").textContent = d.low_risk_count ?? "—";
+        $("s-avg").textContent = d.average_probability != null ? fmtPct(d.average_probability) : "—";
+
+        const total = Number(d.total_predictions ?? 0) || 0;
+        const low = Number(d.low_risk_count ?? 0) || 0;
+        const high = Number(d.high_risk_count ?? 0) || 0;
+        const lowPct = total ? (low / total) * 100 : 0;
+        const highPct = total ? (high / total) * 100 : 0;
+
+        $("bar-low").style.width = lowPct.toFixed(1) + "%";
+        $("bar-high").style.width = highPct.toFixed(1) + "%";
+        $("bar-low-n").textContent = `${low} (${lowPct.toFixed(0)}%)`;
+        $("bar-high-n").textContent = `${high} (${highPct.toFixed(0)}%)`;
+      }
+
+      async function loadHistory() {
+        const list = $("history-list");
+        list.innerHTML = "";
+        const r = await fetch("/history");
+        const items = await r.json();
+        if (!items.length) {
+          list.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary)">No predictions yet. Run one above.</div>';
+          return;
+        }
+        items.slice(0, 10).forEach((item) => {
+          const risk = riskLabel(item.risk_level || item.risk);
+          const prob = item.probability ?? 0;
+          const ts = item.timestamp ? new Date(item.timestamp).toLocaleString() : "—";
+          const initials = (risk === "high" ? "HI" : risk === "medium" ? "MD" : "LO");
+          const div = document.createElement("div");
+          div.className = "history-item";
+          div.innerHTML = `
+            <div class="history-avatar ${risk}">${initials}</div>
+            <div class="history-info">
+              <div class="history-name">${fmtPct(prob)} probability</div>
+              <div class="history-time">${ts}</div>
+            </div>
+            <div class="history-badge ${risk}">${risk.toUpperCase()}</div>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      async function runPredict() {
+        const btn = $("predict-btn");
+        const err = $("predict-error");
+        err.style.display = "none";
+        btn.disabled = true;
+
+        const gender = $("gender").value === "Male" ? "M" : "F";
+        const payload = {
+          Age: parseInt($("age").value) || 34,
+          Gender: gender,
+          ScheduledDay: $("sched").value || new Date().toISOString().slice(0, 10),
+          AppointmentDay: $("appt").value || new Date().toISOString().slice(0, 10),
+          Neighbourhood: $("neigh").value,
+          SMS_received: $("sms").value === "Yes" ? 1 : 0,
+          Scholarship: $("scholar").value === "Yes" ? 1 : 0,
+          Hipertension: $("hyper").value === "Yes" ? 1 : 0
+        };
+
+        try {
+          const r = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.detail || d.error || r.statusText);
+
+          const risk = riskLabel(d.risk_level);
+          const box = $("result-box");
+          box.className = "result-box " + risk;
+          box.style.display = "block";
+          $("result-risk").className = "result-risk " + risk;
+          $("result-risk").textContent = (risk === "high" ? "High risk" : risk === "medium" ? "Medium risk" : "Low risk");
+          $("result-prob").textContent = `No-show probability: ${fmtPct(d.probability)}`;
+          $("result-rec").textContent = d.recommendation || "";
+
+          await Promise.all([loadStats(), loadHistory()]);
+        } catch (e) {
+          err.textContent = "Error: " + e.message;
+          err.style.display = "block";
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      (function init() {
+        const today = new Date().toISOString().slice(0, 10);
+        const future = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+        $("sched").value = today;
+        $("appt").value = future;
+        Promise.all([loadStats(), loadHistory()]).catch(() => {});
+      })();
+    </script>
+  </body>
+</html>
+
