@@ -7,6 +7,10 @@ on:
 jobs:
   build-test-push-hf:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,26 +34,24 @@ jobs:
           pytest -v
 
       - name: Docker login
-        if: "${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_TOKEN != '' }}"
+        if: ${{ env.DOCKER_USERNAME != '' && env.DOCKER_TOKEN != '' }}
         run: |
-          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
       - name: Docker build
-        if: "${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_TOKEN != '' }}"
+        if: ${{ env.DOCKER_USERNAME != '' && env.DOCKER_TOKEN != '' }}
         run: |
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/noshow-iq-23769:latest"
+          IMAGE="$DOCKER_USERNAME/noshow-iq-23769:latest"
           docker build -t "$IMAGE" .
 
       - name: Docker push
-        if: "${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_TOKEN != '' }}"
+        if: ${{ env.DOCKER_USERNAME != '' && env.DOCKER_TOKEN != '' }}
         run: |
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/noshow-iq-23769:latest"
+          IMAGE="$DOCKER_USERNAME/noshow-iq-23769:latest"
           docker push "$IMAGE"
 
       - name: Trigger Hugging Face Space rebuild
-        if: "${{ secrets.HF_TOKEN != '' }}"
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        if: ${{ env.HF_TOKEN != '' }}
         run: |
           python -m pip install --quiet huggingface_hub
           python - <<'PY'
