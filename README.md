@@ -22,3 +22,13 @@ Run:
 python smoke_test.py https://<your-space>.hf.space
 ```
 
+### TestPyPI (required by exam)
+Publish:
+
+```powershell
+$env:TWINE_PASSWORD="pypi-***"
+python .\scripts\publish_testpypi.ps1
+```
+
+Then include the TestPyPI project URL in your report (and optionally add it here).
+

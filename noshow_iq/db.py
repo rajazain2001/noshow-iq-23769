@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Any
 
+import certifi
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -16,7 +17,11 @@ def get_mongo_uri(explicit_uri: str | None = None) -> str | None:
 
 
 def get_client(mongo_uri: str) -> MongoClient:
-    return MongoClient(mongo_uri, serverSelectionTimeoutMS=2000)
+    return MongoClient(
+        mongo_uri,
+        serverSelectionTimeoutMS=5000,
+        tlsCAFile=certifi.where(),
+    )
 
 
 def get_db(client: MongoClient, db_name: str = "noshow_iq") -> Database:

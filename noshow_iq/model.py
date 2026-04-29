@@ -131,11 +131,13 @@ def train(
 
     mongo_logged = False
     if log_training_to_mongo:
+        metrics_doc = asdict(metrics)
+        metrics_doc["per_class"] = {str(k): v for k, v in metrics_doc.get("per_class", {}).items()}
         doc = {
             "timestamp": artifact.trained_at_utc,
             "training_size": int(len(X_train)),
             "imbalance_technique": imbalance_technique,
-            "metrics": asdict(metrics),
+            "metrics": metrics_doc,
         }
         try:
             mongo_logged = insert_training_run(doc)
