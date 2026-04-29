@@ -14,8 +14,8 @@ Predicts the risk of a patient not showing up for a medical appointment.
 
 ### Status
 - CI badge: [![ci-cd](https://github.com/rajazain2001/noshow-iq-23769/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/rajazain2001/noshow-iq-23769/actions/workflows/ci-cd.yml)
-- **Live URL**: _TBD (Hugging Face Spaces)_
-- **Docker image**: https://hub.docker.com/r/<DOCKER_USERNAME>/noshow-iq-23769
+- **Live URL**: https://raja2001-noshow-iq-23769.hf.space
+- **Docker image**: https://hub.docker.com/r/raja1zain/noshow-iq-23769
 
 ### Local development (day 1)
 Create and activate a virtual environment, then install:
