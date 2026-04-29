@@ -130,4 +130,3 @@ def insert_training_run(
         return True
     finally:
         client.close()
-

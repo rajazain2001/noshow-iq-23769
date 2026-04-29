@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 127
+exclude =
+    .venv,
+    .hf_space,
+    .git,
+    __pycache__,
+    build,
+    dist,
+    .pytest_cache,
+    .mypy_cache,
+extend-ignore = E203, W391
+

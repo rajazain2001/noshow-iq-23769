@@ -16,7 +16,12 @@ def main() -> None:
         )
 
     repo_id = os.getenv("HF_SPACE_REPO", "raja2001/noshow-iq-23769")
-    local_html = Path(__file__).resolve().parents[1] / "noshow_iq" / "static" / "noshow_iq_dashboard.html"
+    local_html = (
+        Path(__file__).resolve().parents[1]
+        / "noshow_iq"
+        / "static"
+        / "noshow_iq_dashboard.html"
+    )
     if not local_html.exists():
         raise SystemExit(f"Dashboard not found at {local_html}")
 
@@ -33,4 +38,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
