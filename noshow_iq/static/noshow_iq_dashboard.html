@@ -449,6 +449,9 @@
   $('p-appointment').value = future;
   $('p-id').value = Math.floor(Math.random() * 9e8 + 1e8);
   $('p-age').value = Math.floor(Math.random() * 50 + 18);
+
+  // Auto-connect on load so the UI is interactive immediately.
+  checkHealth();
 </script>
 </body>
 </html>
