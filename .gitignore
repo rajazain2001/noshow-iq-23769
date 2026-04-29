@@ -16,4 +16,5 @@ build/
 data/raw/
 /model.pkl
 !/artifacts/model.pkl
+.hf_space/
 

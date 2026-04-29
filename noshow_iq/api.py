@@ -3,11 +3,12 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Optional
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 
@@ -62,8 +63,9 @@ def create_app(
     db = get_db(client, s.db_name) if client is not None else None
 
     @app.get("/")
-    def root() -> RedirectResponse:
-        return RedirectResponse(url="/docs")
+    def root() -> HTMLResponse:
+        html_path = Path(__file__).parent / "static" / "noshow_iq_dashboard.html"
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
 
     @app.get("/health")
     def health() -> dict[str, Any]:
