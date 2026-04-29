@@ -1,3 +1,13 @@
+---
+title: NoShowIQ (23769)
+emoji: "\U0001FA7A"
+colorFrom: green
+colorTo: green
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 ## NoShowIQ (MLOps Midterm — Spring 2026)
 
 Predicts the risk of a patient not showing up for a medical appointment.
