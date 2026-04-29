@@ -25,7 +25,10 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-RUN useradd -m -u 10001 appuser
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 10001 appuser
 
 COPY --from=builder /opt/venv /opt/venv
 COPY noshow_iq ./noshow_iq
@@ -35,5 +38,5 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["uvicorn", "noshow_iq.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn noshow_iq.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
 

@@ -1,0 +1,101 @@
+name: ci-cd
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test-push-hf:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE_REPO: raja2001/noshow-iq-23769
+      IMAGE_REPO: ${{ secrets.DOCKER_USERNAME }}/noshow-iq-23769
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint (flake8)
+        run: |
+          python -m flake8 .
+
+      - name: Tests (pytest)
+        run: |
+          pytest -v
+
+      - name: Docker login
+        run: |
+          echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      - name: Docker build
+        run: |
+          IMAGE_LATEST="$IMAGE_REPO:latest"
+          IMAGE_SHA="$IMAGE_REPO:${GITHUB_SHA}"
+          docker build -t "$IMAGE_LATEST" -t "$IMAGE_SHA" .
+
+      - name: Docker push
+        run: |
+          IMAGE_LATEST="$IMAGE_REPO:latest"
+          IMAGE_SHA="$IMAGE_REPO:${GITHUB_SHA}"
+          docker push "$IMAGE_LATEST"
+          docker push "$IMAGE_SHA"
+
+      - name: Deploy to Hugging Face Space (Docker) + restart
+        run: |
+          python -m pip install --quiet huggingface_hub
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+          
+          token = os.environ["HF_TOKEN"].strip()
+          repo_id = os.environ["HF_SPACE_REPO"]
+          api = HfApi(token=token)
+          
+          # Ensure space exists (Docker runtime)
+          try:
+              api.create_repo(
+                  repo_id=repo_id,
+                  repo_type="space",
+                  space_sdk="docker",
+                  exist_ok=True,
+              )
+          except Exception as e:
+              print("create_repo warning:", e)
+          
+          # Push current repo contents to the Space repo (rebuild trigger)
+          api.upload_folder(
+              folder_path=".",
+              repo_id=repo_id,
+              repo_type="space",
+              ignore_patterns=[
+                  ".git/*",
+                  ".github/*",
+                  ".venv/*",
+                  "venv/*",
+                  "__pycache__/*",
+                  "data/raw/*",
+                  "dist/*",
+                  "build/*",
+                  "*.egg-info/*",
+              ],
+              commit_message="ci: deploy from GitHub Actions",
+          )
+          
+          api.restart_space(repo_id=repo_id)
+          print("Restart requested for", repo_id)
+          PY
+
